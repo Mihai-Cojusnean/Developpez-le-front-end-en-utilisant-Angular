@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, map} from 'rxjs';
+import {BehaviorSubject, filter, map, Observable} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
 import {Olympic} from "../models/Olympic";
 
@@ -14,24 +14,33 @@ export class OlympicService {
   constructor(private http: HttpClient) {
   }
 
-  public loadInitialData() {
+  public loadInitialData(): Observable<Olympic[]> {
     return this.http.get<Olympic[]>(this.olympicUrl).pipe(
       map((value) => this.getDistinctOlympics(value)),
       tap((distinctOlympics) => this.olympics$.next(distinctOlympics)),
 
       catchError((error, caught) => {
-        // TODO: improve error handling
-        console.error(error);
-        // can be useful to end loading state and let the user know something went wrong
-        // @ts-ignore
-        this.olympics$.next(null);
+        console.error('Error loading initial data:', error);
+        this.olympics$.next([]);
         return caught;
       })
     );
   }
 
-  public getOlympics() {
+  public getOlympics(): Observable<Olympic[]> {
     return this.olympics$.asObservable();
+  }
+
+  public getOlympicByName(name: string): Observable<Olympic> {
+    return this.getOlympics().pipe(
+      map((olympics) => olympics.find((olympic) => olympic.country === name)),
+      filter((olympic): olympic is Olympic => !!olympic),
+
+      catchError((error) => {
+        console.error('Error finding Olympic:', error);
+        throw error;
+      })
+    );
   }
 
   private getDistinctOlympics(olympic: Olympic[]): Olympic[] {
