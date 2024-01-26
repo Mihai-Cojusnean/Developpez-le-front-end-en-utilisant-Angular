@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {Observable, of} from 'rxjs';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Observable, of, Subject, takeUntil} from 'rxjs';
 import {OlympicService} from 'src/app/core/services/olympic.service';
 import {Olympic} from "../../core/models/Olympic";
 import {Participation} from "../../core/models/Participation";
@@ -10,11 +10,11 @@ import {Router} from "@angular/router";
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
+  private destroy$: Subject<void> = new Subject<void>();
   public olympics$: Observable<Olympic[]> = of([]);
 
-  public chartData: {name: string, value: number}[] = [];
-
+  public chartData: { name: string, value: number }[] = [];
   public nrOfCountries: number = 0;
   public nrOfJOs: number = 0;
 
@@ -24,7 +24,8 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.olympics$ = this.olympicService.getOlympics();
-    this.olympics$.subscribe((olympics: Olympic[]) => {
+    this.olympics$.pipe(takeUntil(this.destroy$))
+      .subscribe((olympics: Olympic[]) => {
       this.setUpChart(olympics);
       this.initializeStatistics(olympics);
     });
@@ -41,12 +42,17 @@ export class HomeComponent implements OnInit {
     return participations.reduce((total: number, p: Participation) => total + p.medalsCount, 0);
   }
 
-  public onChartClick(event: {name: string, value: number}): void {
-    this.router.navigate(['country', event.name])
+  public onChartClick(event: { name: string, value: number }): void {
+    this.router.navigate(['countries', event.name])
   }
 
   private initializeStatistics(olympics: Olympic[]): void {
     this.nrOfJOs = olympics[0]?.participations.length;
     this.nrOfCountries = olympics.length;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
