@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, filter, map, Observable} from 'rxjs';
+import {BehaviorSubject, map, Observable} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
 import {Olympic} from "../models/Olympic";
 
@@ -22,6 +22,7 @@ export class OlympicService {
       catchError((error, caught) => {
         console.error('Error loading initial data:', error);
         this.olympics$.next([]);
+
         return caught;
       })
     );
@@ -31,15 +32,14 @@ export class OlympicService {
     return this.olympics$.asObservable();
   }
 
-  public getOlympicByName(name: string): Observable<Olympic> {
-    return this.getOlympics().pipe(
-      map((olympics) => olympics.find((olympic) => olympic.country === name)),
-      filter((olympic): olympic is Olympic => !!olympic),
-
-      catchError((error) => {
-        console.error('Error finding Olympic:', error);
-        throw error;
-      })
+  public getOlympicByCountry(country: string): Observable<Olympic> {
+    return this.http.get<Olympic[]>(this.olympicUrl).pipe(
+      /* The result is either Olympic founded or an error is thrown */
+      map(olympics => olympics.find(olympic => olympic.country === country) || (() => {
+          console.error('Country not found:', country);
+          throw new Error('Country not found');
+        })()
+      )
     );
   }
 
@@ -47,7 +47,7 @@ export class OlympicService {
     const countries = new Set<string>();
 
     return olympic.filter((olympic) => {
-      /* check if the country is already in the set and add it if not */
+      /* Check if the country is already in the set and add it if not */
       return !countries.has(olympic.country) && countries.add(olympic.country);
     });
   }
