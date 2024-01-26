@@ -10,8 +10,8 @@ const routes: Routes = [
     component: HomeComponent,
   },
   {
-    path: 'country/:name',
-    component: CountryDetailsComponent
+    path: 'countries/:name',
+    component: CountryDetailsComponent,
   },
   {
     path: '**', // wildcard
