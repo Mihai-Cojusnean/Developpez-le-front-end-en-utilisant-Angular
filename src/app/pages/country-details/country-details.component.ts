@@ -3,7 +3,8 @@ import {OlympicService} from "../../core/services/olympic.service";
 import {ActivatedRoute, Router} from "@angular/router";
 import {Olympic} from "../../core/models/Olympic";
 import {Participation} from "../../core/models/Participation";
-import {Subject, takeUntil} from "rxjs";
+import {finalize, Subject, takeUntil} from "rxjs";
+import {LoaderService} from "../../core/services/loader.service";
 
 @Component({
   selector: 'app-country-details',
@@ -22,18 +23,27 @@ export class CountryDetailsComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute,
               private router: Router,
-              private olympicService: OlympicService) {
+              private olympicService: OlympicService,
+              protected loaderService: LoaderService) {
   }
 
   ngOnInit(): void {
+    const showLoading: NodeJS.Timeout = setTimeout(() => {
+      this.loaderService.isLoading.next(true);
+    }, 400);
+
     this.country = this.route.snapshot.params['name'];
     this.olympicService.getOlympicByCountry(this.country)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((olympic) => {
+      .pipe(takeUntil(this.destroy$),
+        finalize(() => {
+          clearTimeout(showLoading);
+          this.loaderService.isLoading.next(false);
+        }))
+      .subscribe((olympic: Olympic) => {
         this.olympic = olympic;
         this.setUpChart();
         this.initializeStatistics();
-      }, error => this.router.navigate(['/not-found']))
+      }, error => this.router.navigate(['/not-found']));
   }
 
   private setUpChart(): void {

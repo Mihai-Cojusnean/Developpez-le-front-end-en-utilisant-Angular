@@ -15,7 +15,6 @@ body {
 
 .title-box {
   display: inline-block;
-  padding: 8px;
   text-align: center;
   border-radius: 8px;
   color: white;
@@ -37,9 +36,22 @@ body {
 
 .btn:hover {
   background-color: #07aab7;
+  color: white;
   transition: .5s;
 }
 
 .ngx-charts-tooltip-content {
   background-color: #04838F !important;
+}
+
+#loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mat-progress-spinner circle,
+.mat-spinner circle {
+  stroke: #099999;
 }

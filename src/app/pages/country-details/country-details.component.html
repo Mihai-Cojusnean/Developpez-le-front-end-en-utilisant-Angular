@@ -1,5 +1,5 @@
 <div class="centered-container">
-  <div class="title-box mt-3">{{ country }}</div>
+  <div class="title-box mt-3 p-2">{{ country }}</div>
 </div>
 
 <div class="d-flex justify-content-center">
@@ -18,6 +18,9 @@
 </div>
 
 <div class="d-flex flex-column mx-auto align-items-center">
+  <div id="loading" *ngIf="loaderService.isLoading | async">
+    <mat-spinner diameter="80" mode="indeterminate"></mat-spinner>
+  </div>
   <ngx-charts-line-chart
     [results]="chartData"
     [xAxis]=true

@@ -1,9 +1,10 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Observable, of, Subject, takeUntil} from 'rxjs';
+import {finalize, Subject, takeUntil} from 'rxjs';
 import {OlympicService} from 'src/app/core/services/olympic.service';
 import {Olympic} from "../../core/models/Olympic";
 import {Participation} from "../../core/models/Participation";
 import {Router} from "@angular/router";
+import {LoaderService} from "../../core/services/loader.service";
 
 @Component({
   selector: 'app-home',
@@ -12,23 +13,31 @@ import {Router} from "@angular/router";
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private destroy$: Subject<void> = new Subject<void>();
-  public olympics$: Observable<Olympic[]> = of([]);
 
   public chartData: { name: string, value: number }[] = [];
   public nrOfCountries: number = 0;
   public nrOfJOs: number = 0;
 
   constructor(private router: Router,
-              private olympicService: OlympicService) {
+              private olympicService: OlympicService,
+              protected loaderService: LoaderService) {
   }
 
   ngOnInit(): void {
-    this.olympics$ = this.olympicService.getOlympics();
-    this.olympics$.pipe(takeUntil(this.destroy$))
+    const showLoading: NodeJS.Timeout = setTimeout(() => {
+      this.loaderService.isLoading.next(true);
+    }, 400);
+
+    this.olympicService.getOlympics()
+      .pipe(takeUntil(this.destroy$),
+        finalize(() => {
+          clearTimeout(showLoading);
+          this.loaderService.isLoading.next(false);
+        }))
       .subscribe((olympics: Olympic[]) => {
-      this.setUpChart(olympics);
-      this.initializeStatistics(olympics);
-    });
+        this.setUpChart(olympics);
+        this.initializeStatistics(olympics);
+      });
   }
 
   private setUpChart(olympics: Olympic[]): void {
