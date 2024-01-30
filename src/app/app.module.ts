@@ -9,10 +9,18 @@ import {HeaderComponent} from './pages/page-layout/header/header.component';
 import {NgxChartsModule} from "@swimlane/ngx-charts";
 import {CountryDetailsComponent} from "./pages/country-details/country-details.component";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+
 
 @NgModule({
   declarations: [AppComponent, HomeComponent, NotFoundComponent, HeaderComponent, CountryDetailsComponent],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule, NgxChartsModule, BrowserAnimationsModule],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule,
+    NgxChartsModule,
+    BrowserAnimationsModule,
+    MatProgressSpinnerModule],
   providers: [],
   bootstrap: [AppComponent],
 })
