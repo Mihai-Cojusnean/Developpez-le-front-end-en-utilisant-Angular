@@ -29,7 +29,7 @@ export class CountryDetailsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const showLoading: NodeJS.Timeout = setTimeout(() => {
-      this.loaderService.isLoading.next(true);
+      this.loaderService.showLoader();
     }, 400);
 
     this.country = this.route.snapshot.params['name'];
@@ -37,7 +37,7 @@ export class CountryDetailsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$),
         finalize(() => {
           clearTimeout(showLoading);
-          this.loaderService.isLoading.next(false);
+          this.loaderService.hideLoader()
         }))
       .subscribe((olympic: Olympic) => {
         this.olympic = olympic;

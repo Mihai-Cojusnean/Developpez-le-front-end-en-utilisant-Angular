@@ -25,14 +25,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const showLoading: NodeJS.Timeout = setTimeout(() => {
-      this.loaderService.isLoading.next(true);
+      this.loaderService.showLoader();
     }, 400);
 
     this.olympicService.getOlympics()
       .pipe(takeUntil(this.destroy$),
         finalize(() => {
           clearTimeout(showLoading);
-          this.loaderService.isLoading.next(false);
+          this.loaderService.hideLoader();
         }))
       .subscribe((olympics: Olympic[]) => {
         this.setUpChart(olympics);
