@@ -11,7 +11,6 @@ import {CountryDetailsComponent} from "./pages/country-details/country-details.c
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 
-
 @NgModule({
   declarations: [AppComponent, HomeComponent, NotFoundComponent, HeaderComponent, CountryDetailsComponent],
   imports: [
