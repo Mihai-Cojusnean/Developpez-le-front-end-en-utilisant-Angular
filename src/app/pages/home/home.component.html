@@ -14,7 +14,7 @@
 </div>
 
 <div style="position: relative;">
-  <div id="loading" *ngIf="loaderService.isLoading | async">
+  <div id="loading" *ngIf="chartData?.length==0">
     <mat-spinner diameter="80" mode="indeterminate"></mat-spinner>
   </div>
   <ngx-charts-pie-chart
