@@ -1,10 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {finalize, Subject, takeUntil} from 'rxjs';
+import {Subject, takeUntil} from 'rxjs';
 import {OlympicService} from 'src/app/core/services/olympic.service';
 import {Olympic} from "../../core/models/Olympic";
 import {Participation} from "../../core/models/Participation";
 import {Router} from "@angular/router";
-import {LoaderService} from "../../core/services/loader.service";
 
 @Component({
   selector: 'app-home',
@@ -19,25 +18,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   public nrOfJOs: number = 0;
 
   constructor(private router: Router,
-              private olympicService: OlympicService,
-              protected loaderService: LoaderService) {
+              private olympicService: OlympicService) {
   }
 
   ngOnInit(): void {
-    const showLoading: NodeJS.Timeout = setTimeout(() => {
-      this.loaderService.showLoader();
-    }, 400);
-
     this.olympicService.getOlympics()
-      .pipe(takeUntil(this.destroy$),
-        finalize(() => {
-          clearTimeout(showLoading);
-          this.loaderService.hideLoader();
-        }))
-      .subscribe((olympics: Olympic[]) => {
-        this.setUpChart(olympics);
-        this.initializeStatistics(olympics);
-      });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (olympics: Olympic[]) => {
+          this.setUpChart(olympics);
+          this.initializeStatistics(olympics);
+        }
+      })
   }
 
   private setUpChart(olympics: Olympic[]): void {

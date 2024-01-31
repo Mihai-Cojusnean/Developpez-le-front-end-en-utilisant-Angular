@@ -18,7 +18,7 @@
 </div>
 
 <div class="d-flex flex-column mx-auto align-items-center">
-  <div id="loading" *ngIf="loaderService.isLoading | async">
+  <div id="loading" *ngIf="chartData?.length==0">
     <mat-spinner diameter="80" mode="indeterminate"></mat-spinner>
   </div>
   <ngx-charts-line-chart

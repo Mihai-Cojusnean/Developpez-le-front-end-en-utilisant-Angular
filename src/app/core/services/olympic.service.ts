@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {map, Observable} from 'rxjs';
+import {BehaviorSubject, map, Observable, tap} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import {Olympic} from "../models/Olympic";
 
@@ -9,19 +9,27 @@ import {Olympic} from "../models/Olympic";
 })
 export class OlympicService {
   private olympicUrl = './assets/mock/olympic.json';
+  private olympics$ = new BehaviorSubject<Olympic[]>([]);
 
   constructor(private http: HttpClient) {
   }
 
-  public getOlympics(): Observable<Olympic[]> {
+  public loadInitialData(): Observable<Olympic[]> {
     return this.http.get<Olympic[]>(this.olympicUrl).pipe(
-      map((value) => this.getDistinctOlympics(value)),
+      map((olympic) => this.getDistinctOlympics(olympic)),
+      tap(olympics => this.olympics$.next(this.getDistinctOlympics(olympics))),
 
       catchError((error, caught) => {
-        console.error('Error loading olympics data:', error);
+        console.error('Error loading initial data:', error);
+        this.olympics$.next([]);
+
         return caught;
       })
     );
+  }
+
+  public getOlympics(): Observable<Olympic[]> {
+    return this.olympics$.asObservable();
   }
 
   public getOlympicByCountry(country: string): Observable<Olympic> {
@@ -36,11 +44,8 @@ export class OlympicService {
   }
 
   private getDistinctOlympics(olympic: Olympic[]): Olympic[] {
-    const countries = new Set<string>();
-
-    return olympic.filter((olympic) => {
-      /* Check if the country is already in the set and add it if not */
-      return !countries.has(olympic.country) && countries.add(olympic.country);
-    });
+    return olympic.filter((olympic: Olympic, index: number, array: Olympic[]) =>
+      array.findIndex((t: Olympic) => t.country === olympic.country) === index
+    );
   }
 }
